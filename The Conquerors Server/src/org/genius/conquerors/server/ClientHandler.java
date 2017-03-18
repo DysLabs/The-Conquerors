@@ -15,6 +15,8 @@ public class ClientHandler extends Thread {
 	private final OutputStream rawOut;
 	private GeniusOutputStream out;
 	private GeniusInputStream in;
+	protected String username;
+	protected String spatialId;
 	public ClientHandler(Socket s) throws IOException {
 		this.s=s;
 		this.rawIn=s.getInputStream();
@@ -30,7 +32,7 @@ public class ClientHandler extends Thread {
 			int pid=in.readInt();//packed id
 			Packet generic=Packet.getPacket(pid, in, out);
 			generic.read();
-			
+			PacketHandler ph=new PacketHandler(generic,this);
 		}
 	}
 	
@@ -63,6 +65,24 @@ public class ClientHandler extends Thread {
 			e.printStackTrace();
 		} finally {
 			try {
+				for (int i=0;i<Main.playerList.length;i++) {
+					if (Main.playerList[i].equals(this.username)) {
+						Main.playerList[i]=null;
+					}
+				}
+				String[] players=new String[Main.playerList.length-1];
+				for (int i=0;i<Main.playerList.length;i++) {
+					if (Main.playerList[i]!=null) {
+						players[i]=Main.playerList[i];
+					}
+				}
+				Main.playerCount--;
+				Main.playerList=players;
+				Packet18 chat=new Packet18(getIn(),getOut());
+				chat.setSender("Server");
+				chat.setAlly(false);
+				chat.setMessage(username+" unexpectdly disconnected");
+				Main.broadcastPacket(chat);
 				s.close();
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -72,5 +92,13 @@ public class ClientHandler extends Thread {
 	
 	public void sendPacket(Packet p) throws IOException {
 		p.write(this.out);
+	}
+	
+	public GeniusOutputStream getOut() {
+		return this.out;
+	}
+	
+	public GeniusInputStream getIn() {
+		return this.in;
 	}
 }
