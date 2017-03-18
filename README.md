@@ -19,10 +19,11 @@
 	</tr>
 </table>
 -->
-Protocol Documentation for DysLabs's The Conquerors<br/>
-Runs on a TCP connection
-<br/><br/>
+# The Conquerors
+The Conquerors is a fairly popular game on roblox.com. I decided to see if I could reimplement it in the Java programming language. This version will not be a carbon copy and eventually I will give it its one identity, that is it will not follow updates to the Roblox game.
 
+# Protocol Documentation
+This documentation will always be up-to-date. It is intended to run on a TCP connection, but the protocol format (I feel) would work well with UDP, however I find UDP to be much more difficult, and the fact that there is still a chance for packet dropping using UDP. Anyways, if you want to do your own thing with the game here's the protocol:
 <table border="1" class="wikitable">
 	<tr>
 		<th>Name</th>
