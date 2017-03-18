@@ -104,7 +104,7 @@ This documentation will always be up-to-date. It is intended to run on a TCP con
 
 <h3>Serverbound</h3>
 <h4>Packet 0 Login</h4>
-<table border="1">
+<table border="1" width="100%">
 	<tr>
 		<th>Packet ID</th>
 		<th>Field Name</th>
