@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Random;
 
 import p.Packet;
@@ -15,6 +16,7 @@ public class Main {
 	public static String[] playerList=new String[0];
 	private static ArrayList<ClientHandler> clientHandlers=new ArrayList();
 	private static int entityCount=0;
+	private static HashMap<String,GameWindow> windows=new HashMap();
 	public static void main(String[]args) throws NumberFormatException, IOException {
 		System.out.print("Enter server port:");
 		BufferedReader in=new BufferedReader(new InputStreamReader(System.in));
@@ -24,6 +26,14 @@ public class Main {
 			clientHandlers.add(h);
 			h.start();
 		}
+	}
+	
+	public static GameWindow getWindowForSpatialID(String spatialid) {
+		return windows.get(spatialid);
+	}
+	
+	public static GameWindow registerWindowForSpatial(String spatial,GameWindow window) {
+		return windows.put(spatial, window);
 	}
 	
 	public static void broadcastPacket(Packet p) {

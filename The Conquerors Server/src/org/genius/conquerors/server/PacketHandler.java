@@ -18,7 +18,50 @@ public class PacketHandler {
 		case 0:
 			handle0();
 			break;
+		case 4:
+			handle4();
+			break;
+		case 10:
+			handle10();
+			break;
+		case 11:
+			handle11();
+			break;
+		case 14:
+			handle14();
+			break;
 		}
+	}
+	
+	private void handle14() {
+		Packet14 packet=(Packet14)p;
+		
+	}
+	
+	private void handle11() {
+		Packet11 packet=(Packet11)p;
+		Packet9 rotateEntity=new Packet9(h.getIn(),h.getOut());
+		rotateEntity.setSpatialId(h.spatialId);
+		rotateEntity.setX(packet.getX());
+		rotateEntity.setY(packet.getY());
+		rotateEntity.setZ(packet.getZ());
+		Main.broadcastPacket(rotateEntity);
+	}
+	
+	private void handle10() {
+		Packet10 packet=(Packet10)p;
+		Packet7 translateEntity=new Packet7(h.getIn(),h.getOut());
+		translateEntity.setSpatialId(h.spatialId);
+		translateEntity.setX(packet.getX());
+		translateEntity.setY(packet.getY());
+		translateEntity.setZ(packet.getZ());
+		Main.broadcastPacket(translateEntity);
+	}
+	
+	private void handle4() {
+		Packet4 packet=(Packet4)p;
+		String modelUri=packet.getModel();
+		//TODO: add assets !!!!
 	}
 	
 	private void handle0() throws IOException {
