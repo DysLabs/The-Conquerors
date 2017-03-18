@@ -104,7 +104,7 @@ This documentation will always be up-to-date. It is intended to run on a TCP con
 
 <h3>Serverbound</h3>
 <h4>Packet 0 Login</h4>
-<table border="1" class="wikitable">
+<table border="1">
 	<tr>
 		<th>Packet ID</th>
 		<th>Field Name</th>
@@ -112,7 +112,7 @@ This documentation will always be up-to-date. It is intended to run on a TCP con
 		<th>Notes</th>
 	</tr>
 	<tr>
-		<td rowspan="400">0</td>
+		<td rowspan="2">0</td>
 		<td>Name</td>
 		<td>String</td>
 		<td>The username supplied by the user</td>
