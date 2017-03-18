@@ -18,7 +18,7 @@ public class Packet2 extends Packet {
 	}
 
 	@Override
-	public void write() throws IOException {
+	public void write(GeniusOutputStream out) throws IOException {
 		out.writeInt(2);//packet id
 		out.writeUTF(reason);
 	}

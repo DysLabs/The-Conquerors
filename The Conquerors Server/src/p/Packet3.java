@@ -20,7 +20,7 @@ public class Packet3 extends Packet {
 	}
 
 	@Override
-	public void write() throws IOException {
+	public void write(GeniusOutputStream out) throws IOException {
 		out.writeInt(3);//packet id
 		out.writeUTF(modelName);
 		out.writeInt(modelLength);

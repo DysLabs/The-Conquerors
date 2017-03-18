@@ -27,6 +27,7 @@ public abstract class Packet {
 		packetTable.put(9, Packet9.class);
 		packetTable.put(10, Packet10.class);
 		packetTable.put(11, Packet11.class);
+		packetTable.put(1397966893, Packet1397966893.class);
 	}
 	
 	public Packet(GeniusInputStream in,GeniusOutputStream out) {
@@ -35,16 +36,16 @@ public abstract class Packet {
 	}
 	
 	public static Packet getPacket(int pid,GeniusInputStream in,GeniusOutputStream out) throws ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-		Class<?> clazz = Class.forName("Packet"+pid);
+		Class<?> clazz = Class.forName("p.Packet"+pid);
 		Constructor<?> ctor = clazz.getConstructor(GeniusInputStream.class,GeniusOutputStream.class);
 		return (Packet)ctor.newInstance(new Object[] { in,out });
 	}
 	
-	/**
-	 * Will write packet id
-	 * @throws IOException
-	 */
-	public abstract void write() throws IOException;
+	public abstract void write(GeniusOutputStream out) throws IOException;
+	
+	public void write() throws IOException {
+		write(out);
+	}
 	/**
 	 * will not read packet id
 	 * @throws IOException

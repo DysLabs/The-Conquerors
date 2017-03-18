@@ -19,7 +19,7 @@ public class Packet8 extends Packet {
 	}
 
 	@Override
-	public void write() throws IOException {
+	public void write(GeniusOutputStream out) throws IOException {
 		out.writeInt(8);//packet id
 		out.writeUTF(spatialId);
 		out.writeFloat(x);

@@ -21,4 +21,14 @@ public class Main {
 			h.start();
 		}
 	}
+	
+	public static void broadcastPacket(Packet p) {
+		clientHandlers.stream().forEach(h -> {
+			try {
+				h.sendPacket(p);
+			} catch (IOException e) {
+				System.out.println("broken client");
+			}
+		});
+	}
 }

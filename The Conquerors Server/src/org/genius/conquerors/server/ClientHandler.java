@@ -13,19 +13,24 @@ public class ClientHandler extends Thread {
 	private final Socket s;
 	private final InputStream rawIn;
 	private final OutputStream rawOut;
+	private GeniusOutputStream out;
+	private GeniusInputStream in;
 	public ClientHandler(Socket s) throws IOException {
 		this.s=s;
 		this.rawIn=s.getInputStream();
 		this.rawOut=s.getOutputStream();
 	}
-	
+	//Packet1397966893
+	//Packet1397966893
 	private void init() throws IOException, ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-		GeniusInputStream in=new GeniusInputStream(rawIn);
-		GeniusOutputStream out=new GeniusOutputStream(rawOut);
+		this.in=new GeniusInputStream(rawIn);
+		this.out=new GeniusOutputStream(rawOut);
 		PushbackInputStream check=new PushbackInputStream(rawIn);
 		while (check.available()!=0) {
 			int pid=in.readInt();//packed id
 			Packet generic=Packet.getPacket(pid, in, out);
+			generic.read();
+			
 		}
 	}
 	
@@ -56,6 +61,16 @@ public class ClientHandler extends Thread {
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} finally {
+			try {
+				s.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
+	}
+	
+	public void sendPacket(Packet p) throws IOException {
+		p.write(this.out);
 	}
 }
