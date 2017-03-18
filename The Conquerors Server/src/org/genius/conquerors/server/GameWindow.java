@@ -9,6 +9,7 @@ public class GameWindow {
 		opts=prompts;
 		this.qualifiers=qualifiers;
 		this.windowID=Main.getSpatialID("window");
+		
 	}
 	
 	public int slots(ClientHandler h) {
