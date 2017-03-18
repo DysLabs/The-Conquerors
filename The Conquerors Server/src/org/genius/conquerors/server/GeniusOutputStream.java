@@ -75,4 +75,10 @@ public class GeniusOutputStream implements DataOutput {
 	public void writeChars(String s) throws IOException {
 		out.writeChars(s);
 	}
+	
+	public void writeVector(float x,float y, float z) throws IOException {
+		writeFloat(x);
+		writeFloat(y);
+		writeFloat(z);
+	}
 }

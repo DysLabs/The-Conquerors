@@ -29,7 +29,25 @@ public class Packet1 extends Packet {
 
 	@Override
 	public void read() throws IOException {
-		
+		this.playerListLength=in.readByte();
+		this.player=new String[this.playerListLength];
+		for (int i=0;i<this.playerListLength;i++) {
+			this.player[i]=in.readUTF();
+		}
+	}
+	
+	public byte getPlayerListLength() {
+		return this.playerListLength;
+	}
+	public void setPlayerListLength(byte playerListLength) {
+		this.playerListLength=playerListLength;
 	}
 
+	public String[] getPlayer() {
+		return player;
+	}
+
+	public void setPlayer(String[] player) {
+		this.player = player;
+	}
 }

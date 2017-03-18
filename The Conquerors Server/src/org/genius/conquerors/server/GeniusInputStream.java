@@ -69,7 +69,7 @@ public class GeniusInputStream implements DataInput {
 
 	@Override
 	public String readLine() throws IOException {
-		return null;
+		return readUTF();
 	}
 
 	@Override
