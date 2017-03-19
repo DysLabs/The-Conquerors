@@ -30,12 +30,54 @@ public class PacketHandler {
 		case 14:
 			handle14();
 			break;
+		case 16:
+			handle16();
+			break;
+		case 17:
+			handle17();
+			break;
 		}
 	}
 	
-	private void handle14() {
+	private void handle17() {
+		Packet17 packet=(Packet17)p;
+		String msg=packet.getMessage();
+		if (packet.isAlly()) {
+			
+		} else {
+			
+		}
+	}
+	
+	private void handle16() {
+		Packet16 packet=(Packet16)p;
+		Packet18 chat=new Packet18(h.getIn(),h.getOut());
+		chat.setSender("Server");
+		chat.setAlly(false);
+		chat.setMessage(h.username+" left the game");
+		Packet12 removeEntity=new Packet12(h.getIn(),h.getOut());
+		removeEntity.setSpatialId(h.spatialId);
+		Main.broadcastPacket(chat);
+		Main.broadcastPacket(removeEntity);
+	}
+	
+	private void handle14() throws IOException {
 		Packet14 packet=(Packet14)p;
-		
+		String spatial=packet.getSpatialId();
+		GameWindow w=Main.getWindowForSpatialID(spatial);
+		if (w!=null) {
+			Packet15 openWindow=new Packet15(h.getIn(),h.getOut());
+			openWindow.setSpatialID(spatial);
+			openWindow.setSlots((byte) w.slots(h));
+			openWindow.setSlot(w.options(h));
+			h.sendPacket(openWindow);
+		} else {
+			Packet18 chat=new Packet18(h.getIn(),h.getOut());
+			chat.setSender("Server");
+			chat.setAlly(false);
+			chat.setMessage("You tried to open a non-existant window");
+			h.sendPacket(chat);
+		}
 	}
 	
 	private void handle11() {
