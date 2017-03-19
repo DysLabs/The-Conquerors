@@ -1,55 +1,14 @@
 package p;
 
-import java.io.IOException;
-
-import org.genius.conquerors.server.GeniusInputStream;
-import org.genius.conquerors.server.GeniusOutputStream;
-
+/**
+ * Packet 18 Chat
+ * clientbound
+ * @author sn
+ *
+ */
 public class Packet18 extends Packet {
-	private String sender;
-	private boolean ally;
-	private String message;
-	public Packet18(GeniusInputStream in, GeniusOutputStream out) {
-		super(in, out);
-	}
-
-	@Override
-	public void write(GeniusOutputStream out) throws IOException {
-		out.writeInt(18);//packet id
-		out.writeUTF(sender);
-		out.writeBoolean(ally);
-		out.writeUTF(message);
-	}
-
-	@Override
-	public void read() throws IOException {
-		sender=in.readLine();
-		ally=in.readBoolean();
-		message=in.readLine();
-	}
-
-	public String getSender() {
-		return sender;
-	}
-
-	public void setSender(String sender) {
-		this.sender = sender;
-	}
-
-	public boolean isAlly() {
-		return ally;
-	}
-
-	public void setAlly(boolean ally) {
-		this.ally = ally;
-	}
-
-	public String getMessage() {
-		return message;
-	}
-
-	public void setMessage(String message) {
-		this.message = message;
-	}
-
+	private final int p_id=18;
+	private String p_sender;
+	private boolean p_ally;
+	private String p_message;
 }

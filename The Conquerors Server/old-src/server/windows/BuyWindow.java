@@ -22,18 +22,12 @@ public class BuyWindow extends GameWindow {
 		Buildings[] b=Buildings.values();
 		JavaFunction[] jfs=new JavaFunction[b.length];
 		for (int i=0;i<b.length;i++) {
-			final int j=i;
-			jfs[i]=new JavaFunction(){
-				@Override
-				public Boolean run(Object... args) {
-					ClientHandler h=(ClientHandler)args[0];
-					return (h.money>=b[j].cost);
-				}};
+			jfs[i]=b[i].qualifier;
 		}
 		return jfs;
 	}
 
-	private enum Buildings {
+	public enum Buildings {
 		LANDMINE(20),
 		RESEARCH_CENTER(100),
 		HOSPITAL(180),
@@ -58,9 +52,20 @@ public class BuyWindow extends GameWindow {
 		COMMANDER_CENTER(400),;
 		
 		public final int cost;
+		public final JavaFunction qualifier;
+		
+		private Buildings(int cost,JavaFunction qualifier) {
+			this.cost=cost;
+			this.qualifier=qualifier;
+		}
 		
 		private Buildings(int cost) {
-			this.cost=cost;
+			this(cost,new JavaFunction(){
+				@Override
+				public Boolean run(Object... args) {
+					ClientHandler h=(ClientHandler)args[0];
+					return (h.money>=cost);
+				}});
 		}
 	}
 }

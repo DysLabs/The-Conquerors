@@ -1,10 +1,5 @@
 package p;
 
-import java.io.IOException;
-
-import org.genius.conquerors.server.GeniusInputStream;
-import org.genius.conquerors.server.GeniusOutputStream;
-
 /**
  * Packet 12 Remove Entity
  * clientbound
@@ -12,28 +7,6 @@ import org.genius.conquerors.server.GeniusOutputStream;
  *
  */
 public class Packet12 extends Packet {
-	private String spatialId;
-	public Packet12(GeniusInputStream in, GeniusOutputStream out) {
-		super(in, out);
-	}
-
-	@Override
-	public void write(GeniusOutputStream out) throws IOException {
-		out.writeInt(12);//packet ID
-		out.writeUTF(spatialId);
-	}
-
-	@Override
-	public void read() throws IOException {
-		this.spatialId=in.readLine();
-	}
-
-	public String getSpatialId() {
-		return spatialId;
-	}
-
-	public void setSpatialId(String spatialId) {
-		this.spatialId = spatialId;
-	}
-
+	private final int p_id=12;
+	private String p_spatialID;
 }

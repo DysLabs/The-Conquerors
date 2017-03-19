@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import java.io.PushbackInputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.net.Socket;
+import java.util.ArrayList;
 
 import p.Packet;
 import p.Packet18;
@@ -19,6 +20,7 @@ public class ClientHandler extends Thread {
 	protected String username;
 	protected String spatialId;
 	public int money=300;
+	protected final ArrayList<String> ally=new ArrayList();//list of allies (spatial ID)
 	public ClientHandler(Socket s) throws IOException {
 		this.s=s;
 		this.rawIn=s.getInputStream();

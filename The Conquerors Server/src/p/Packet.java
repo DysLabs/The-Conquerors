@@ -1,36 +1,80 @@
 package p;
 
-import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.util.HashMap;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
 
-import org.genius.conquerors.server.GeniusInputStream;
-import org.genius.conquerors.server.GeniusOutputStream;
-
-public abstract class Packet {
-	protected GeniusOutputStream out;
-	protected GeniusInputStream in;
-	
-	public Packet(GeniusInputStream in,GeniusOutputStream out) {
-		this.in=in;
-		this.out=out;
+public class Packet {
+	public String[] getFields() {
+		Field[] fields=this.getClass().getDeclaredFields();
+		ArrayList<String> packetFields=new ArrayList<String>();
+		for (int i=0;i<fields.length;i++) {
+			if (fields[i].getName().startsWith("p_")) {
+				packetFields.add(fields[i].getName());
+			}
+		}
+		String[] pfs=new String[packetFields.size()];
+		pfs=packetFields.toArray(pfs);
+		return pfs;
 	}
 	
-	public static Packet getPacket(int pid,GeniusInputStream in,GeniusOutputStream out) throws ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-		Class<?> clazz = Class.forName("p.Packet"+pid);
-		Constructor<?> ctor = clazz.getConstructor(GeniusInputStream.class,GeniusOutputStream.class);
-		return (Packet)ctor.newInstance(new Object[] { in,out });
+	public String[] getFieldTypes() {
+		Field[] fields=this.getClass().getDeclaredFields();
+		ArrayList<String> packetFields=new ArrayList<String>();
+		for (int i=0;i<fields.length;i++) {
+			if (fields[i].getName().startsWith("p_")) {
+				packetFields.add(c(fields[i].getType().getSimpleName().toLowerCase()).replace("[]", "Array").trim());
+			}
+		}
+		String[] pfs=new String[packetFields.size()];
+		pfs=packetFields.toArray(pfs);
+		return pfs;
 	}
 	
-	public abstract void write(GeniusOutputStream out) throws IOException;
-	
-	public void write() throws IOException {
-		write(out);
+	public Object[] getFieldValues() throws IllegalArgumentException, IllegalAccessException {
+		Field[] fields=this.getClass().getDeclaredFields();
+		ArrayList<Object> packetFields=new ArrayList<Object>();
+		for (int i=0;i<fields.length;i++) {
+			if (fields[i].getName().startsWith("p_")) {
+				boolean accessible=fields[i].isAccessible();
+				fields[i].setAccessible(true);
+				packetFields.add(fields[i].get(this));
+				fields[i].setAccessible(accessible);
+			}
+		}
+		Object[] pfs=new Object[packetFields.size()];
+		pfs=packetFields.toArray(pfs);
+		return pfs;
 	}
+	
+	public boolean initialized() throws IllegalArgumentException, IllegalAccessException {
+		boolean init=true;
+		Object[] fields=getFieldValues();
+		for (int i=0;i<fields.length;i++) {
+			if (fields[i]==null) {
+				init=false;
+			}
+		}
+		return init;
+	}
+	
+	private String c(final String line) {
+		return Character.toUpperCase(line.charAt(0)) + line.substring(1);
+	}
+	
 	/**
-	 * will not read packet id
-	 * @throws IOException
+	 * Do not include the "p_" prefix
+	 * @param field
+	 * @param value
+	 * @throws SecurityException 
+	 * @throws NoSuchFieldException 
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
 	 */
-	public abstract void read() throws IOException;
+	public <T> void set(String field,T value) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+		Field f=this.getClass().getDeclaredField("p_"+field);
+		boolean accessible=f.isAccessible();
+		f.setAccessible(true);
+		f.set(this, value);
+		f.setAccessible(accessible);
+	}
 }

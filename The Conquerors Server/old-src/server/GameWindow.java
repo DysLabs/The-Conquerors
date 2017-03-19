@@ -3,9 +3,13 @@ package org.genius.conquerors.server;
 public class GameWindow {
 	private String[] opts;
 	private JavaFunction[] qualifiers;
+	private final String windowID;
+	
 	public GameWindow(String[]prompts,JavaFunction[]qualifiers) {
 		opts=prompts;
 		this.qualifiers=qualifiers;
+		this.windowID=Main.getSpatialID("window");
+		
 	}
 	
 	public int slots(ClientHandler h) {
