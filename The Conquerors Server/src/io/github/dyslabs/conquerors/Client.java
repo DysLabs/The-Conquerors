@@ -12,9 +12,22 @@ public class Client extends PacketReceiver {
 	private final PacketOutputStream out;
 	private final PacketInputStream in;
 	private final Socket s;
-	private final PlayerData PlayerData=new PlayerData();
+	public final PlayerData PlayerData=new PlayerData();
+	private boolean running=true;
 	public Client(Socket s) throws IOException {
 		this(s.getInputStream(),s.getOutputStream(),s);
+	}
+	
+	/**
+	 * If this returns false, the client should be ungrouped immediatally
+	 * @return
+	 */
+	public boolean isValid() {
+		return running;
+	}
+	
+	public synchronized void valid(boolean b) {
+		this.running=b;
 	}
 	
 	private Client(InputStream in,OutputStream out,Socket s) {
@@ -31,7 +44,7 @@ public class Client extends PacketReceiver {
 	
 	public void run() throws InterruptedException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException, ClassNotFoundException, NoSuchFieldException, IOException {
 		//System.out.println("{"+Thread.currentThread().getName()+"} Now polling "+s.getInetAddress()+" for data");
-		while (true) {
+		while (running) {
 			poll();
 		}
 	}
@@ -56,8 +69,21 @@ public class Client extends PacketReceiver {
 						"reason","You are running a different version than us. Upgrade (or downgrade) to protocol version "+Main.PROTOCOL
 				});
 				Client.this.sendPacket(loginFailure);
-			} else if (true) {
-				
+				Main.clientDisconnect(Client.this);
+			} else if (Main.players()>=16) {
+				Packet loginFailure=PacketBus.craftPacket(2, new Object[]{
+						"reason","Server is already full"
+				});
+				Client.this.sendPacket(loginFailure);
+				Main.clientDisconnect(Client.this);
+			}
+			else { //successful login
+				Client.this.PlayerData.spatialID=Main.getID("entity[player]");
+				Packet loginSuccess=PacketBus.craftPacket(1, new Object[]{
+						"playerList",Main.playerList()
+				});
+				Client.this.sendPacket(loginSuccess);
+				Main.registerPlayer(Client.this);
 			}
 		}
 	}
@@ -66,5 +92,6 @@ public class Client extends PacketReceiver {
 		public final Group alliance=new Group();
 		public String username;
 		public int money=300;
+		public String spatialID;
 	}
 }

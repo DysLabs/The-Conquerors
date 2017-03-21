@@ -41,9 +41,20 @@ public class Group {
 	public void group(PacketReceiver... pr) {
 		this.receivers.addAll(Arrays.<PacketReceiver>asList(pr));
 	}
+	
+	public void ungroup(PacketReceiver...pr) {
+		for (int i=0;i<pr.length;i++) {
+			System.out.println("Ungrouped "+pr[i]);
+			this.receivers.remove(pr[i]);
+		}
+	}
 
 	public void broadcast(Packet p) {
 		receivers.stream().forEach(r -> {
+			if (!((Client)r).isValid()) {
+				ungroup(r);
+				return;
+			}
 			try {
 				r.sendPacket(p);
 			} catch (IllegalArgumentException e) {
@@ -67,5 +78,9 @@ public class Group {
 	
 	public Stream<PacketReceiver> stream() {
 		return receivers.stream();
+	}
+	
+	public int size() {
+		return receivers.size();
 	}
 }
