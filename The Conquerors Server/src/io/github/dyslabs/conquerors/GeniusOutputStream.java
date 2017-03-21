@@ -1,4 +1,4 @@
-package genius;
+package io.github.dyslabs.conquerors;
 
 import java.io.DataOutput;
 import java.io.DataOutputStream;

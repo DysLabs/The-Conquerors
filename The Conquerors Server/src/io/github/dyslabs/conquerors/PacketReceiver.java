@@ -1,4 +1,4 @@
-package genius;
+package io.github.dyslabs.conquerors;
 
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;

@@ -46,6 +46,23 @@ public class Packet {
 		return pfs;
 	}
 	
+	public <T> T getField(String field) throws IllegalArgumentException, IllegalAccessException {
+		String[] fields=getFields();
+		Object[] values=getFieldValues();
+		for (int i=0;i<fields.length;i++) {
+			String f=fields[i];
+			Object v=values[i];
+			if (f.equals("p_"+field)) {
+				return (T) v;
+			}
+		}
+		throw new IllegalArgumentException("Packet"+getPacketID()+" does not have field"+field);
+	}
+	
+	public int getPacketID() throws IllegalArgumentException, IllegalAccessException {
+		return this.<Integer>getField("id");
+	}
+	
 	public boolean initialized() throws IllegalArgumentException, IllegalAccessException {
 		boolean init=true;
 		Object[] fields=getFieldValues();
@@ -76,5 +93,23 @@ public class Packet {
 		f.setAccessible(true);
 		f.set(this, value);
 		f.setAccessible(accessible);
+	}
+	
+	public String toString() {
+		String s="Packet[";
+		try {
+			String[] fields=getFields();
+			String[] fieldTypes=getFieldTypes();
+			Object[] values=getFieldValues();
+			for (int i=0;i<fields.length;i++) {
+				String f=fields[i];
+				String t=fieldTypes[i];
+				Object v=values[i];
+				s=s+f+"("+t.toLowerCase()+")="+v+"; ";
+			}
+		} catch (IllegalArgumentException | IllegalAccessException e) {
+			return s+"NULL";
+		}
+		return s+"]";
 	}
 }

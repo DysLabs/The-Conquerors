@@ -1,4 +1,4 @@
-package genius;
+package io.github.dyslabs.conquerors;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,7 +10,7 @@ import p.Packet;
 
 public class PacketInputStream {
 	private final GeniusInputStream gis;
-	public PacketInputStream(InputStream in) throws IOException {
+	public PacketInputStream(InputStream in) {
 		this.gis=new GeniusInputStream(in);
 	}
 	
@@ -46,6 +46,7 @@ public class PacketInputStream {
 				continue;//we already have the id
 			}
 			String t=types[i];
+			//System.out.println(f+"("+t+")");
 			Object val=gis.getClass().getMethod("read"+t).invoke(gis);
 			p.set(f, val);
 		}

@@ -8,5 +8,6 @@ package p;
  */
 public class Packet8 extends Packet {
 	private final int p_id=8;
+	private String spatialID;
 	private float p_x,p_y,p_z;
 }
