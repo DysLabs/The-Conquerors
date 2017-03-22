@@ -39,52 +39,49 @@ public class Client extends PacketReceiver {
 	
 	private void poll() throws InterruptedException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException, ClassNotFoundException, NoSuchFieldException, IOException {
 		Packet p=in.readPacket();
-		new PacketHandler(p);
+		switch (p.getPacketID()) {
+		case 0://Login
+			PlayerData.username=p.getField("username");
+			Main.registerPlayer(p, this);
+			break;
+		case 4://Request Model
+			String modelUri=p.getField("modelName");
+			byte[] model=Main.getModel(modelUri);
+			this.sendPacket(PacketBus.craftPacket(3, 
+					"modelName",modelUri,
+					"model",model
+			));
+			break;
+		case 10://Player Position
+			float x=p.getField("x"),y=p.getField("y"),z=p.getField("z");
+			Main.broadcast(PacketBus.craftPacket(7, 
+					"spatialID",PlayerData.spatialID,
+					"x",x,
+					"y",y,
+					"z",z
+			));
+			break;
+		case 11://Player Look
+			float x1=p.getField("x"),y1=p.getField("y"),z1=p.getField("z");
+			Main.broadcast(PacketBus.craftPacket(9, 
+					"spatialID",PlayerData.spatialID,
+					"x",x1,
+					"y",y1,
+					"z",z1
+			));
+			break;
+		case 14://Request Window
+			break;//TODO: window system
+		case 16://Disconnect
+			Main.clientDisconnect(this);
+			break;
+		}
 	}
 	
 	public void run() throws InterruptedException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException, ClassNotFoundException, NoSuchFieldException, IOException {
 		//System.out.println("{"+Thread.currentThread().getName()+"} Now polling "+s.getInetAddress()+" for data");
 		while (running) {
 			poll();
-		}
-	}
-	
-	private class PacketHandler {
-		private final Packet p;
-		public PacketHandler(Packet p) throws IllegalArgumentException, IllegalAccessException, NoSuchMethodException, SecurityException, InstantiationException, InvocationTargetException, NoSuchFieldException {
-			this.p=p;
-			switch (p.getPacketID()) {
-			case 0:
-				handle0();
-				break;
-			}
-		}
-		
-		private void handle0() throws IllegalArgumentException, IllegalAccessException, NoSuchMethodException, SecurityException, InstantiationException, InvocationTargetException, NoSuchFieldException {
-			String username=p.getField("username");
-			int protocolVersion=p.getField("protocolVersion");
-			Client.this.PlayerData.username=username;
-			if (protocolVersion!=Main.PROTOCOL) {//different protocol oops
-				Packet loginFailure=PacketBus.craftPacket(2, new Object[]{
-						"reason","You are running a different version than us. Upgrade (or downgrade) to protocol version "+Main.PROTOCOL
-				});
-				Client.this.sendPacket(loginFailure);
-				Main.clientDisconnect(Client.this);
-			} else if (Main.players()>=16) {
-				Packet loginFailure=PacketBus.craftPacket(2, new Object[]{
-						"reason","Server is already full"
-				});
-				Client.this.sendPacket(loginFailure);
-				Main.clientDisconnect(Client.this);
-			}
-			else { //successful login
-				Client.this.PlayerData.spatialID=Main.getID("entity[player]");
-				Packet loginSuccess=PacketBus.craftPacket(1, new Object[]{
-						"playerList",Main.playerList()
-				});
-				Client.this.sendPacket(loginSuccess);
-				Main.registerPlayer(Client.this);
-			}
 		}
 	}
 	

@@ -8,5 +8,5 @@ package p;
  */
 public class Packet1 extends Packet {
 	private final int p_id=1;
-	private String[] p_playerList;
+	private String spatialID;
 }

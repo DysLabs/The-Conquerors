@@ -74,7 +74,7 @@ public class Main {
 						} catch (NoSuchMethodException | SecurityException | InstantiationException
 								| IllegalAccessException | IllegalArgumentException | InvocationTargetException
 								| NoSuchFieldException e1) {
-							System.err.println("literally cant even disconnect client");
+							System.out.println("cant disconnect client");
 						}
 					} catch (IOException e) {
 						// TODO Auto-generated catch block
@@ -83,33 +83,6 @@ public class Main {
 				}
 			}.start();
 		}
-	}
-	
-	/**
-	 * When a client has disconnected
-	 * @param c
-	 * @throws NoSuchFieldException 
-	 * @throws InvocationTargetException 
-	 * @throws IllegalArgumentException 
-	 * @throws IllegalAccessException 
-	 * @throws InstantiationException 
-	 * @throws SecurityException 
-	 * @throws NoSuchMethodException 
-	 */
-	public static void clientDisconnect(Client c) throws NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchFieldException {
-		System.out.println(c.PlayerData.username+" has disconnected");
-		c.valid(false);
-		Packet chatMessage=PacketBus.craftPacket(18, new Object[]{
-				"sender","Server",
-				"ally",false,
-				"message",c.PlayerData.username+" has left the game"
-		});
-		Main.ALL.ungroup(c);
-		Main.ALL.broadcast(chatMessage);
-		Packet playerList=PacketBus.craftPacket(13, new Object[]{
-				"playerNames",Main.playerList()
-		});
-		Main.ALL.broadcast(playerList);
 	}
 	
 	public static String[] playerList() {
@@ -134,14 +107,73 @@ public class Main {
 		return getID("undefinedobject");
 	}
 	
-	public static void registerPlayer(Client c) throws NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchFieldException {
-		Main.ALL.group(c);
-		Packet chat=PacketBus.craftPacket(18, new Object[]{
-				"sender","Server",
-				"ally",false,
-				"message","Welcome "+c.PlayerData.username+" to the game!"
-		});
-		Main.ALL.broadcast(chat);
+	public static void registerPlayer(Packet p,Client c) throws NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchFieldException {
+		/*
+		 * Assuming login success:
+		 * Add player to ALL group
+		 * Set a spatialID for the player
+		 * Send login success packet
+		 * Broadcast PlayerList Packet
+		 * Broadcast CheckModel Packet
+		 * Broadcast SpawnEntity
+		 * (As Appropriate) Broadcast TranslateEntity, ScaleEntity, and RotateEntity
+		 */
+		if (ALL.size()>=Main.MAX_PLAYERS) {
+			c.sendPacket(PacketBus.craftPacket(2, new Object[]{
+					"reason","The server is full, sorry"
+			}));
+		} else if (p.<Integer>getField("protocolVersion")!=Main.PROTOCOL) {
+			c.sendPacket(PacketBus.craftPacket(2, 
+					"reason","You are running a different version than the server"
+			));
+		}
+		else {//login success
+			c.PlayerData.spatialID=Main.getID("player");
+			//login success packet
+			c.sendPacket(PacketBus.craftPacket(1, 
+					"spatialID",c.PlayerData.spatialID
+			));
+			//player list packet
+			Main.ALL.group(c);
+			String[] playerNames=new String[Main.ALL.size()];
+			int[] i=new int[]{0};
+			Main.ALL.stream().forEach(pr -> {
+				playerNames[i[0]]=((Client)pr).PlayerData.username;
+				i[0]++;
+			});
+			Main.ALL.broadcast(PacketBus.craftPacket(13, 
+					"playerNames",playerNames
+			));
+			//check model
+			//TODO: Add models
+			//spawn entity
+			Main.ALL.broadcast(PacketBus.craftPacket(5, 
+					"model","player model", //TODO: model support
+					"material","player material", //TODO: model support
+					"spatialID",c.PlayerData.spatialID
+			));
+			//set entity (translate, scale, and rotate
+			Main.ALL.broadcast(PacketBus.craftPacket(7, 
+					"spatialID",c.PlayerData.spatialID,
+					"x",0f, // * TODO:
+					"y",0f, // * Add map dimensions
+					"z",0f  // * Entity support
+			));
+		}
+	}
+	
+	public static void checkModel(String modelUri) throws NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchFieldException {
+		Main.ALL.broadcast(PacketBus.craftPacket(6, 
+				"modelName",modelUri
+		));
+	}
+	
+	public static byte[] getModel(String modelUri) {
+		return new byte[0];//TODO: model support
+	}
+	
+	public static void clientDisconnect(Client c) throws NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchFieldException {
+		
 	}
 	
 	public static void broadcast(Packet p) {
