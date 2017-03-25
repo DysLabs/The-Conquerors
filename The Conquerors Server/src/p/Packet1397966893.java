@@ -1,8 +1,12 @@
 package p;
 
 public class Packet1397966893 extends Packet {
-	private final int p_id = 1397966893;
-	private String p_vl;
-	private int[] p_intarray;
-	private String[] p_stringarray;
+	@PacketField
+	private final int id = 1397966893;
+	@PacketField
+	private String vl;
+	@PacketField
+	private int[] intarray;
+	@PacketField
+	private String[] stringarray;
 }

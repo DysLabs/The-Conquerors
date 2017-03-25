@@ -8,158 +8,167 @@ import java.io.InputStream;
 public class GeniusInputStream implements DataInput {
 	private final DataInputStream in;
 
-	public GeniusInputStream(InputStream in) {
+	public GeniusInputStream(final InputStream in) {
 		this.in = new DataInputStream(in);
 	}
 
-	public boolean readBoolean() throws IOException {
-		return in.readBoolean();
-	}
-
-	public byte readByte() throws IOException {
-		return in.readByte();
-	}
-
-	public short readShort() throws IOException {
-		return in.readShort();
-	}
-
-	public int readInt() throws IOException {
-		return in.readInt();
-	}
-
-	public long readLong() throws IOException {
-		return in.readLong();
-	}
-
-	public float readFloat() throws IOException {
-		return in.readFloat();
-	}
-
-	public double readDouble() throws IOException {
-		return in.readDouble();
-	}
-
-	public String readString() throws IOException {
-		return readUTF();
-	}
-
-	public String readUTF() throws IOException {
-		int len = readInt();
-		char[] c = new char[len];
-		for (int i = 0; i < len; i++) {
-			c[i] = (char) readShort();
-		}
-		return new String(c);
-	}
-
-	public char readChar() throws IOException {
-		return (char) readShort();
-	}
-
 	public int read() throws IOException {
-		return in.read();
+		return this.in.read();
 	}
 
 	@Override
-	public void readFully(byte[] b) throws IOException {
-		in.readFully(b);
+	public boolean readBoolean() throws IOException {
+		return this.in.readBoolean();
+	}
+
+	public boolean[] readBooleanArray() throws IOException {
+		final int len = this.readInt();
+		final boolean[] b = new boolean[len];
+		for (int i = 0; i < len; i++) {
+			b[i] = this.readBoolean();
+		}
+		return b;
 	}
 
 	@Override
-	public void readFully(byte[] b, int off, int len) throws IOException {
-		in.readFully(b, off, len);
+	public byte readByte() throws IOException {
+		return this.in.readByte();
+	}
+
+	public byte[] readByteArray() throws IOException {
+		final int len = this.readInt();
+		final byte[] b = new byte[len];
+		for (int i = 0; i < len; i++) {
+			b[i] = this.readByte();
+		}
+		return b;
+	}
+
+	@Override
+	public char readChar() throws IOException {
+		return (char) this.readShort();
+	}
+
+	@Override
+	public double readDouble() throws IOException {
+		return this.in.readDouble();
+	}
+
+	public double[] readDoubleArray() throws IOException {
+		final int len = this.readInt();
+		final double[] b = new double[len];
+		for (int i = 0; i < len; i++) {
+			b[i] = this.readDouble();
+		}
+		return b;
+	}
+
+	@Override
+	public float readFloat() throws IOException {
+		return this.in.readFloat();
+	}
+
+	public float[] readFloatArray() throws IOException {
+		final int len = this.readInt();
+		final float[] b = new float[len];
+		for (int i = 0; i < len; i++) {
+			b[i] = this.readFloat();
+		}
+		return b;
+	}
+
+	@Override
+	public void readFully(final byte[] b) throws IOException {
+		this.in.readFully(b);
+	}
+
+	@Override
+	public void readFully(final byte[] b, final int off, final int len) throws IOException {
+		this.in.readFully(b, off, len);
+	}
+
+	@Override
+	public int readInt() throws IOException {
+		return this.in.readInt();
+	}
+
+	public int[] readIntArray() throws IOException {
+		final int len = this.readInt();
+		final int[] b = new int[len];
+		for (int i = 0; i < len; i++) {
+			b[i] = this.readInt();
+		}
+		return b;
 	}
 
 	@Override
 	public String readLine() throws IOException {
-		return readUTF();
+		return this.readUTF();
+	}
+
+	@Override
+	public long readLong() throws IOException {
+		return this.in.readLong();
+	}
+
+	public long[] readLongArray() throws IOException {
+		final int len = this.readInt();
+		final long[] b = new long[len];
+		for (int i = 0; i < len; i++) {
+			b[i] = this.readLong();
+		}
+		return b;
+	}
+
+	@Override
+	public short readShort() throws IOException {
+		return this.in.readShort();
+	}
+
+	public short[] readShortArray() throws IOException {
+		final int len = this.readInt();
+		final short[] b = new short[len];
+		for (int i = 0; i < len; i++) {
+			b[i] = this.readShort();
+		}
+		return b;
+	}
+
+	public String readString() throws IOException {
+		return this.readUTF();
+	}
+
+	public String[] readStringArray() throws IOException {
+		final int len = this.readInt();
+		final String[] b = new String[len];
+		for (int i = 0; i < len; i++) {
+			b[i] = this.readString();
+		}
+		return b;
 	}
 
 	@Override
 	public int readUnsignedByte() throws IOException {
-		return in.readUnsignedByte();
+		return this.in.readUnsignedByte();
 	}
 
 	@Override
 	public int readUnsignedShort() throws IOException {
-		return in.readUnsignedShort();
+		return this.in.readUnsignedShort();
 	}
 
 	@Override
-	public int skipBytes(int n) throws IOException {
-		return in.skipBytes(n);
+	public String readUTF() throws IOException {
+		final int len = this.readInt();
+		final char[] c = new char[len];
+		for (int i = 0; i < len; i++) {
+			c[i] = (char) this.readShort();
+		}
+		return new String(c);
 	}
 
-	public boolean[] readBooleanArray() throws IOException {
-		int len = readInt();
-		boolean[] b = new boolean[len];
-		for (int i = 0; i < len; i++) {
-			b[i] = readBoolean();
-		}
-		return b;
-	}
-
-	public byte[] readByteArray() throws IOException {
-		int len = readInt();
-		byte[] b = new byte[len];
-		for (int i = 0; i < len; i++) {
-			b[i] = readByte();
-		}
-		return b;
-	}
-
-	public short[] readShortArray() throws IOException {
-		int len = readInt();
-		short[] b = new short[len];
-		for (int i = 0; i < len; i++) {
-			b[i] = readShort();
-		}
-		return b;
-	}
-
-	public int[] readIntArray() throws IOException {
-		int len = readInt();
-		int[] b = new int[len];
-		for (int i = 0; i < len; i++) {
-			b[i] = readInt();
-		}
-		return b;
-	}
-
-	public long[] readLongArray() throws IOException {
-		int len = readInt();
-		long[] b = new long[len];
-		for (int i = 0; i < len; i++) {
-			b[i] = readLong();
-		}
-		return b;
-	}
-
-	public float[] readFloatArray() throws IOException {
-		int len = readInt();
-		float[] b = new float[len];
-		for (int i = 0; i < len; i++) {
-			b[i] = readFloat();
-		}
-		return b;
-	}
-
-	public double[] readDoubleArray() throws IOException {
-		int len = readInt();
-		double[] b = new double[len];
-		for (int i = 0; i < len; i++) {
-			b[i] = readDouble();
-		}
-		return b;
-	}
-
-	public String[] readStringArray() throws IOException {
-		int len = readInt();
-		String[] b = new String[len];
-		for (int i = 0; i < len; i++) {
-			b[i] = readString();
-		}
-		return b;
+	@Override
+	public int skipBytes(final int n) throws IOException {
+		return this.in.skipBytes(n);
 	}
 }

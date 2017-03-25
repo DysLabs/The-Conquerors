@@ -8,12 +8,12 @@ import p.Packet;
 public class PacketReceiver {
 	private final PacketOutputStream out;
 
-	public PacketReceiver(OutputStream out) {
+	public PacketReceiver(final OutputStream out) {
 		this.out = new PacketOutputStream(out);
 	}
 
-	public void sendPacket(Packet p) throws IllegalArgumentException, IllegalAccessException, NoSuchMethodException,
-			SecurityException, InvocationTargetException {
-		out.writePacket(p);
+	public void sendPacket(final Packet p) throws IllegalArgumentException, IllegalAccessException,
+			NoSuchMethodException, SecurityException, InvocationTargetException {
+		this.out.writePacket(p);
 	}
 }
