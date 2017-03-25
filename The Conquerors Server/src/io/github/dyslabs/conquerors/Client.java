@@ -67,8 +67,10 @@ public class Client extends PacketReceiver {
 			Main.broadcast(PacketBus.craftPacket(9, "spatialID", this.PlayerData.spatialID, "x", x1, "y", y1, "z", z1));
 			break;
 		case 14:// Request Window
-			this.sendPacket(Main.encodeWindowAsPacket(Window.BUY_WINDOW, this));
-			break;// TODO: window system
+			String spatialID=p.getField("spatialID");
+			Window w=Window.findWindow(spatialID);
+			sendPacket(Main.encodeWindowAsPacket(w, this));
+			break;
 		case 16:// Disconnect
 			Main.clientDisconnect(this);
 			break;
@@ -85,6 +87,10 @@ public class Client extends PacketReceiver {
 			Main.chat(sender, ally, msg);
 			break;
 		case 19:// Select Window Slot
+			String spatialID1=p.getField("spatialID");
+			byte slot=p.getField("slot");
+			Window w1=Window.findWindow(spatialID1);
+			w1.select(slot, this);
 			break;
 		case 20:// Move Units
 			break;

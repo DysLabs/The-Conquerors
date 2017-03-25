@@ -1,8 +1,0 @@
-25 3 2017 2:32:7 PM
-io.github.dyslabs.conquerors.Main main
-INFO: Logfile: 2017032514327.txt
-
-25 3 2017 2:32:7 PM
-io.github.dyslabs.conquerors.Main main
-INFO: Server Spatial ID: server[4631346408091980865]
-
