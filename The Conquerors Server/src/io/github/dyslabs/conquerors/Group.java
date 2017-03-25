@@ -1,4 +1,4 @@
-package genius;
+package io.github.dyslabs.conquerors;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -29,21 +29,36 @@ import p.Packet;
 
 /**
  * A group is a list of {@link PacketReceivers}
+ * 
  * @author sn
  *
  */
 public class Group {
-	private final ArrayList<PacketReceiver> receivers=new ArrayList<PacketReceiver>();
+	private final ArrayList<PacketReceiver> receivers = new ArrayList<PacketReceiver>();
+
 	public Group(PacketReceiver... packetReceivers) {
 		this.receivers.addAll(Arrays.<PacketReceiver>asList(packetReceivers));
 	}
-	
-	public void group(PacketReceiver... pr) {
+
+	public synchronized void group(PacketReceiver... pr) {
 		this.receivers.addAll(Arrays.<PacketReceiver>asList(pr));
+		Main.out.info("Grouped " + pr + " into " + this);
+		Main.out.info(size() + " members in this group");
 	}
 
-	public void broadcast(Packet p) {
+	public synchronized void ungroup(PacketReceiver... pr) {
+		for (int i = 0; i < pr.length; i++) {
+			// System.out.println("Ungrouped "+pr[i]);
+			this.receivers.remove(pr[i]);
+		}
+	}
+
+	public synchronized void broadcast(Packet p) {
 		receivers.stream().forEach(r -> {
+			if (!((Client) r).isValid()) {
+				ungroup(r);
+				return;
+			}
 			try {
 				r.sendPacket(p);
 			} catch (IllegalArgumentException e) {
@@ -64,8 +79,16 @@ public class Group {
 			}
 		});
 	}
-	
-	public Stream<PacketReceiver> stream() {
+
+	public synchronized Stream<PacketReceiver> stream() {
 		return receivers.stream();
+	}
+
+	public synchronized int size() {
+		return receivers.size();
+	}
+
+	public synchronized boolean include(PacketReceiver pr) {
+		return receivers.contains(pr);
 	}
 }
