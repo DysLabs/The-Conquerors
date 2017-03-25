@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.net.Socket;
 
+import io.github.dyslabs.conquerors.window.Window;
 import p.Packet;
 
 public class Client extends PacketReceiver {
@@ -71,9 +72,26 @@ public class Client extends PacketReceiver {
 			));
 			break;
 		case 14://Request Window
+			this.sendPacket(Main.encodeWindowAsPacket(Window.BUY_WINDOW, this));
 			break;//TODO: window system
 		case 16://Disconnect
 			Main.clientDisconnect(this);
+			break;
+		case 17://Chat
+			String sender=p.getField("sender");
+			boolean ally=p.getField("ally");
+			String message=p.getField("message");
+			String msg;
+			if (ally) {
+				msg=Main.chatMsg("(ALLY) "+sender, message);
+			} else {
+				msg=Main.chatMsg(sender, message);
+			}
+			Main.chat(sender, ally, msg);
+			break;
+		case 19://Select Window Slot
+			break;
+		case 20://Move Units
 			break;
 		}
 	}
@@ -84,6 +102,8 @@ public class Client extends PacketReceiver {
 			poll();
 		}
 	}
+	
+	
 	
 	public class PlayerData {
 		public final Group alliance=new Group();

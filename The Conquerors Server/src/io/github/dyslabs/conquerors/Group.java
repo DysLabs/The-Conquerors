@@ -83,4 +83,8 @@ public class Group {
 	public int size() {
 		return receivers.size();
 	}
+	
+	public boolean include(PacketReceiver pr) {
+		return receivers.contains(pr);
+	}
 }

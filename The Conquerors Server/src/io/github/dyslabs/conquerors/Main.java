@@ -7,9 +7,12 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Random;
 import java.util.stream.IntStream;
 
+import io.github.dyslabs.conquerors.window.Window;
 import p.Packet;
 import p.Packet0;
 
@@ -18,6 +21,7 @@ public class Main {
 	public static final int MAX_PLAYERS=16;
 	private static final Group ALL=new Group(); 
 	public static final Random RANDOM=new Random(System.nanoTime());
+	public static final Date START=new Date();
 	public static void main(String[]args) throws IOException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException, ClassNotFoundException, NoSuchFieldException {
 		BufferedReader in=new BufferedReader(new InputStreamReader(System.in));
 		System.out.print("Enter server port:");
@@ -32,6 +36,7 @@ public class Main {
 			}
 		}.start();
 		
+		START.setTime(System.currentTimeMillis());
 		while (true) {
 			Client c=new Client(servlet.accept());
 			ALL.group(c);
@@ -90,6 +95,7 @@ public class Main {
 		int[] i=new int[]{0};
 		Main.ALL.stream().forEach(c -> {
 			players[i[0]]=((Client)c).PlayerData.username;
+			i[0]++;
 		});
 		return players;
 	}
@@ -135,15 +141,7 @@ public class Main {
 			));
 			//player list packet
 			Main.ALL.group(c);
-			String[] playerNames=new String[Main.ALL.size()];
-			int[] i=new int[]{0};
-			Main.ALL.stream().forEach(pr -> {
-				playerNames[i[0]]=((Client)pr).PlayerData.username;
-				i[0]++;
-			});
-			Main.ALL.broadcast(PacketBus.craftPacket(13, 
-					"playerNames",playerNames
-			));
+			Main.broadcastPlayerList();
 			//check model
 			//TODO: Add models
 			//spawn entity
@@ -162,6 +160,13 @@ public class Main {
 		}
 	}
 	
+	public static void broadcastPlayerList() throws NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchFieldException {
+		String[] playerNames=Main.playerList();
+		Main.ALL.broadcast(PacketBus.craftPacket(13, 
+				"playerNames",playerNames
+		));
+	}
+	
 	public static void checkModel(String modelUri) throws NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchFieldException {
 		Main.ALL.broadcast(PacketBus.craftPacket(6, 
 				"modelName",modelUri
@@ -173,10 +178,49 @@ public class Main {
 	}
 	
 	public static void clientDisconnect(Client c) throws NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchFieldException {
-		
+		/**
+		 * Ungroup player
+		 * Update player list
+		 * Remove entity
+		 */
+		c.valid(false);
+		Main.ALL.ungroup(c);
+		Main.broadcastPlayerList();
+		Main.broadcast(PacketBus.craftPacket(12, 
+				"spatialID",c.PlayerData.spatialID
+		));
 	}
 	
 	public static void broadcast(Packet p) {
 		Main.ALL.broadcast(p);
+	}
+	
+	public static String chatMsg(String snd,String msg) {
+		Date now=new Date();
+		SimpleDateFormat sdf=new SimpleDateFormat("h:m");
+		return "["+sdf.format(now)+"] "+snd+": "+msg;
+	}
+	
+	public static void chat(String sender,boolean ally,String message) throws NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchFieldException {
+		Main.broadcast(PacketBus.craftPacket(18, 
+				"sender",sender,
+				"ally",ally,
+				"message",message
+		));
+	}
+	
+	public static Packet encodeWindowAsPacket(Window w,Client c) throws NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchFieldException {
+		return PacketBus.craftPacket(15, "slots",w.slotsText(c));
+	}
+	
+	public static Client getPlayer(String username) {
+		Client[] c=new Client[]{null};
+		Main.ALL.stream().forEach(pr -> {
+			Client client=(Client)pr;
+			if (username.equals(client.PlayerData.username)) {
+				c[0]=client;
+			}
+		});
+		return c[0];
 	}
 }
