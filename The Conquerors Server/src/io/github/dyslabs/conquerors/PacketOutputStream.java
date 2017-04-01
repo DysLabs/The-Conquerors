@@ -30,6 +30,6 @@ public class PacketOutputStream {
 				Main.out.warning("Attempted to send non-finalized packet. Missing field " + fields[i]);
 			}
 		}
-		Main.out.info("Successfully sent: " + p);
+		Main.out.info(p.toString());
 	}
 }

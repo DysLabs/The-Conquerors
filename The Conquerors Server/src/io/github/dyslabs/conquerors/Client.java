@@ -6,7 +6,6 @@ import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.net.Socket;
 
-import io.github.dyslabs.conquerors.window.Window;
 import p.Packet;
 
 public class Client extends PacketReceiver {
@@ -20,12 +19,11 @@ public class Client extends PacketReceiver {
 	private final PacketOutputStream out;
 	private final PacketInputStream in;
 	private final Socket s;
+	private Packet job;
 	public final PlayerData PlayerData = new PlayerData();
 
-	private boolean running = true;
-
-	private Client(final InputStream in, final OutputStream out, final Socket s) {
-		super(out);
+	private Client(final InputStream in, final OutputStream out, final Socket s) throws IOException {
+		super(s);
 		this.out = new PacketOutputStream(out);
 		this.in = new PacketInputStream(in);
 		this.s = s;
@@ -35,79 +33,37 @@ public class Client extends PacketReceiver {
 		this(s.getInputStream(), s.getOutputStream(), s);
 	}
 
-	/**
-	 * If this returns false, the client should be ungrouped immediatally
-	 *
-	 * @return
-	 */
-	public boolean isValid() {
-		return this.running;
-	}
-
-	private void poll() throws InterruptedException, InstantiationException, IllegalAccessException,
-			IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException,
-			ClassNotFoundException, NoSuchFieldException, IOException {
-		final Packet p = this.in.readPacket();
-		switch (p.getPacketID()) {
-		case 0:// Login
-			this.PlayerData.username = p.getField("username");
-			Main.registerPlayer(p, this);
-			break;
-		case 4:// Request Model
-			final String modelUri = p.getField("modelName");
-			final byte[] model = Main.getModel(modelUri);
-			this.sendPacket(PacketBus.craftPacket(3, "modelName", modelUri, "model", model));
-			break;
-		case 10:// Player Position
-			final float x = p.getField("x"), y = p.getField("y"), z = p.getField("z");
-			Main.broadcast(PacketBus.craftPacket(7, "spatialID", this.PlayerData.spatialID, "x", x, "y", y, "z", z));
-			break;
-		case 11:// Player Look
-			final float x1 = p.getField("x"), y1 = p.getField("y"), z1 = p.getField("z");
-			Main.broadcast(PacketBus.craftPacket(9, "spatialID", this.PlayerData.spatialID, "x", x1, "y", y1, "z", z1));
-			break;
-		case 14:// Request Window
-			String spatialID=p.getField("spatialID");
-			Window w=Window.findWindow(spatialID);
-			sendPacket(Main.encodeWindowAsPacket(w, this));
-			break;
-		case 16:// Disconnect
-			Main.clientDisconnect(this);
-			break;
-		case 17:// Chat
-			final String sender = p.getField("sender");
-			final boolean ally = p.getField("ally");
-			final String message = p.getField("message");
-			String msg;
-			if (ally) {
-				msg = Main.chatMsg("(ALLY) " + sender, message);
-			} else {
-				msg = Main.chatMsg(sender, message);
-			}
-			Main.chat(sender, ally, msg);
-			break;
-		case 19:// Select Window Slot
-			String spatialID1=p.getField("spatialID");
-			byte slot=p.getField("slot");
-			Window w1=Window.findWindow(spatialID1);
-			w1.select(slot, this);
-			break;
-		case 20:// Move Units
-			break;
+	
+	public void poll() throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException, ClassNotFoundException, NoSuchFieldException, IOException {
+		Packet p=in.readPacket();
+		this.job=p;
+		if (p.getPacketID()==0) {// Login
+			PlayerData.username=p.getField("username");
+			Main.registerClient(this);
+		} else if (p.getPacketID()==4) {// Request Window
+			sendPacket(Packet.c(3, Main.getModel(p.getField("modelName"))));
+		} else if (p.getPacketID()==10) {// Player Position
+			float x=p.getField("x"),y=p.getField("y"),z=p.getField("z");
+			Main.broadcast(Packet.c(7, PlayerData.spatialID,x,y,z));
+		} else if (p.getPacketID()==11) {// Player Look
+			float x=p.getField("x"),y=p.getField("y"),z=p.getField("z");
+			Main.broadcast(Packet.c(9, PlayerData.spatialID,x,y,z));
+		} else if (p.getPacketID()==14) {//Request Window
+			//TODO window
+		} else if (p.getPacketID()==16) { // Disconnect
+			//TODO disconnect
+		} else if (p.getPacketID()==17) { // Chat
+			//TODO chat
+		} else if (p.getPacketID()==19) { // Select Window Slot
+			//TODO window
+		}
+		
+		else {
+			Main.out.warning("Non-existant packet#"+p.getPacketID());
 		}
 	}
-
-	public void run() throws InterruptedException, InstantiationException, IllegalAccessException,
-			IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException,
-			ClassNotFoundException, NoSuchFieldException, IOException {
-		// System.out.println("{"+Thread.currentThread().getName()+"} Now
-		// polling "+s.getInetAddress()+" for data");
-		while (this.running) {
-			this.poll();
-		}
-	}
-
-	public synchronized void valid(final boolean b) {
-		this.running = b;
+	
+	public Packet job() {
+		return job;
 	}
 }

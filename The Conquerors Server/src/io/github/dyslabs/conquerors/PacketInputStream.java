@@ -52,7 +52,7 @@ public class PacketInputStream {
 			final Object val = this.gis.getClass().getMethod("read" + t).invoke(this.gis);
 			p.set(f, val);
 		}
-		Main.out.info("Read " + p);
+		Main.out.info(p.toString());
 		return p;
 	}
 }

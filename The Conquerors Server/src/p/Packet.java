@@ -1,7 +1,12 @@
 package p;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.logging.Level;
+
+import io.github.dyslabs.conquerors.Main;
 
 public class Packet {
 	private String c(final String line) {
@@ -117,7 +122,81 @@ public class Packet {
 		} catch (IllegalArgumentException | IllegalAccessException e) {
 			return s + "NULL";
 		}
-		s = s/* .substring(0, s.lastIndexOf("; ")); */;
+		s = s.substring(0, s.lastIndexOf("; "));
 		return s + "}";
+	}
+
+	/**
+	 *
+	 * @param pid
+	 * @param fields
+	 *            format of fieldName(String),value(T)
+	 * @return
+	 * @throws SecurityException
+	 * @throws NoSuchMethodException
+	 * @throws InvocationTargetException
+	 * @throws IllegalArgumentException
+	 * @throws IllegalAccessException
+	 * @throws InstantiationException
+	 * @throws NoSuchFieldException
+	 */
+	public static Packet craftPacket(final int pid, final Object... fields)
+			throws NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException,
+			IllegalArgumentException, InvocationTargetException, NoSuchFieldException {
+		Class<?> clazz;
+		try {
+			clazz = Class.forName("p.Packet" + pid);
+		} catch (final ClassNotFoundException e) {
+			Main.out.log(Level.SEVERE, "Attempted to craft non-existant Packet" + pid, e);
+			return null;
+		}
+		final Constructor<?> ctor = clazz.getConstructor();
+		final Packet p = (Packet) ctor.newInstance();
+		for (int i = 0; i < fields.length; i++) {
+			final String f = (String) fields[i];
+			final Object v = fields[i + 1];
+			p.set(f, v);
+			i++;// fields[i+1] is the value, we need to skip it
+		}
+		return p;
+	}
+	
+	/**
+	 * This method differs in that it only takes the field values, not the names
+	 * @param pid
+	 * @param fieldValues
+	 * @return
+	 * @throws SecurityException 
+	 * @throws NoSuchMethodException 
+	 * @throws InvocationTargetException 
+	 * @throws IllegalArgumentException 
+	 * @throws IllegalAccessException 
+	 * @throws InstantiationException 
+	 * @throws NoSuchFieldException 
+	 */
+	public static Packet c(int pid,Object...fieldValues) throws NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchFieldException {
+		Class<?> clazz;
+		try {
+			clazz = Class.forName("p.Packet" + pid);
+		} catch (final ClassNotFoundException e) {
+			Main.out.log(Level.SEVERE, "Attempted to craft non-existant Packet" + pid, e);
+			return null;
+		}
+		final Constructor<?> ctor = clazz.getConstructor();
+		final Packet p = (Packet) ctor.newInstance();
+		String[] fields=p.getFields();
+		if (fieldValues.length!=fields.length-1) {
+			Main.out.severe("Fields and fieldValues mismatched");
+			return null;
+		}
+		for (int i=0;i<fields.length;i++) {
+			String f=fields[i];
+			if (f.equals("id")) {
+				continue;
+			}
+			Object v=fieldValues[i-1];
+			p.set(f, v);
+		}
+		return p;
 	}
 }

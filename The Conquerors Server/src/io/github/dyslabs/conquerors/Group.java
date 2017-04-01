@@ -3,6 +3,8 @@ package io.github.dyslabs.conquerors;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
+import java.util.logging.Level;
 import java.util.stream.Stream;
 
 import p.Packet;
@@ -22,33 +24,33 @@ public class Group {
 
 	public synchronized void broadcast(final Packet p) {
 		this.receivers.stream().forEach(r -> {
-			if (!((Client) r).isValid()) {
-				this.ungroup(r);
+			if (!r.isValid()) {
 				return;
 			}
 			try {
 				r.sendPacket(p);
 			} catch (final IllegalArgumentException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				Main.out.log(Level.SEVERE, "An error occured", e);
 			} catch (final IllegalAccessException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				Main.out.log(Level.SEVERE, "An error occured", e);
 			} catch (final NoSuchMethodException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				Main.out.log(Level.SEVERE, "An error occured", e);
 			} catch (final SecurityException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				Main.out.log(Level.SEVERE, "An error occured", e);
 			} catch (final InvocationTargetException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				Main.out.log(Level.SEVERE, "An error occured", e);
 			}
 		});
 	}
 
 	public synchronized void group(final PacketReceiver... pr) {
-		this.receivers.addAll(Arrays.<PacketReceiver>asList(pr));
+		for (PacketReceiver p : pr) {
+			group(p);
+		}
+	}
+	
+	public synchronized void group(PacketReceiver pr) {
+		this.receivers.add(pr);
 		Main.out.info("Grouped " + pr + " into " + this);
 		Main.out.info(this.size() + " members in this group");
 	}
@@ -58,11 +60,15 @@ public class Group {
 	}
 
 	public synchronized int size() {
-		return this.receivers.size();
+		return list().size();
 	}
 
 	public synchronized Stream<PacketReceiver> stream() {
-		return this.receivers.stream();
+		return list().stream();
+	}
+	
+	public synchronized Iterator<PacketReceiver> iterator() {
+		return list().iterator();
 	}
 
 	public synchronized void ungroup(final PacketReceiver... pr) {
@@ -70,5 +76,15 @@ public class Group {
 			// System.out.println("Ungrouped "+pr[i]);
 			this.receivers.remove(element);
 		}
+	}
+	
+	public synchronized ArrayList<PacketReceiver> list() {
+		ArrayList<PacketReceiver> list=new ArrayList<>();
+		this.receivers.forEach(pr -> {
+			if (pr.isValid()) {
+				list.add(pr);
+			}
+		});
+		return list;
 	}
 }
