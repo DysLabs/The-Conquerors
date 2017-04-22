@@ -31,5 +31,6 @@ public class PacketOutputStream {
 			}
 		}
 		Main.out.info(p.toString());
+		Main.pout.info(p.toString());
 	}
 }

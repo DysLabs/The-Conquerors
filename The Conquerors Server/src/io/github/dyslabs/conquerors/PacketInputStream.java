@@ -10,11 +10,26 @@ import p.Packet;
 
 public class PacketInputStream {
 	private final GeniusInputStream gis;
-	private PushbackInputStream pushBackStream;
+	private final PushbackInputStream pushBackStream;
 
 	public PacketInputStream(final InputStream in) {
 		this.gis = new GeniusInputStream(in);
-		this.pushBackStream=new PushbackInputStream(in);
+		this.pushBackStream = new PushbackInputStream(in);
+	}
+
+	public int available() throws IOException {
+		return this.gis.available();
+	}
+
+	public boolean empty() throws IOException {
+		final int b = this.pushBackStream.read();
+		// Main.out.info(b+"");
+		if (b == -1) {
+			return true;
+		}
+		Main.out.info("Data can be read!");
+		this.pushBackStream.unread(b);
+		return false;
 	}
 
 	/**
@@ -56,21 +71,7 @@ public class PacketInputStream {
 			p.set(f, val);
 		}
 		Main.out.info(p.toString());
+		Main.pout.info(p.toString());
 		return p;
-	}
-	
-	public boolean empty() throws IOException {
-		  int b=pushBackStream.read();
-		  //Main.out.info(b+"");
-		  if (b==-1) {
-			  return true;
-		  }
-		  Main.out.info("Data can be read!");
-		  pushBackStream.unread(b);
-		  return false;
-	  }
-	
-	public int available() throws IOException {
-		return gis.available();
 	}
 }

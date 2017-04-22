@@ -58,6 +58,13 @@ public class GeniusOutputStream implements DataOutput {
 			this.writeByte(element);
 		}
 	}
+	
+	public void writeByteArray(final byte[] b) throws IOException {
+		this.writeInt(b.length);
+		for (final Byte element : b) {
+			this.writeByte(element);
+		}
+	}
 
 	@Override
 	public void writeBytes(final String s) throws IOException {

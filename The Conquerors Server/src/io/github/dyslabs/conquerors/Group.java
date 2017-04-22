@@ -40,7 +40,7 @@ public class Group {
 				Main.out.log(Level.SEVERE, "An error occured", e);
 			} catch (final InvocationTargetException e) {
 				Main.out.log(Level.SEVERE, "An error occured", e);
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
@@ -48,12 +48,12 @@ public class Group {
 	}
 
 	public synchronized void group(final PacketReceiver... pr) {
-		for (PacketReceiver p : pr) {
-			group(p);
+		for (final PacketReceiver p : pr) {
+			this.group(p);
 		}
 	}
-	
-	public synchronized void group(PacketReceiver pr) {
+
+	public synchronized void group(final PacketReceiver pr) {
 		this.receivers.add(pr);
 		Main.out.info("Grouped " + pr + " into " + this);
 		Main.out.info(this.size() + " members in this group");
@@ -63,31 +63,31 @@ public class Group {
 		return this.receivers.contains(pr);
 	}
 
-	public synchronized int size() {
-		return list().size();
-	}
-
-	public synchronized Stream<PacketReceiver> stream() {
-		return list().stream();
-	}
-	
 	public synchronized Iterator<PacketReceiver> iterator() {
-		return list().iterator();
+		return this.list().iterator();
 	}
 
-	public synchronized void ungroup(final PacketReceiver... pr) {
-		for (final PacketReceiver element : pr) {
-			this.receivers.remove(element);
-		}
-	}
-	
 	public synchronized ArrayList<PacketReceiver> list() {
-		ArrayList<PacketReceiver> list=new ArrayList<>();
+		final ArrayList<PacketReceiver> list = new ArrayList<>();
 		this.receivers.forEach(pr -> {
 			if (pr.isValid()) {
 				list.add(pr);
 			}
 		});
 		return list;
+	}
+
+	public synchronized int size() {
+		return this.list().size();
+	}
+
+	public synchronized Stream<PacketReceiver> stream() {
+		return this.list().stream();
+	}
+
+	public synchronized void ungroup(final PacketReceiver... pr) {
+		for (final PacketReceiver element : pr) {
+			this.receivers.remove(element);
+		}
 	}
 }
