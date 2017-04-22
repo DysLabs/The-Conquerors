@@ -28,6 +28,7 @@ public class PacketReceiver {
 			NoSuchMethodException, SecurityException, InvocationTargetException, IOException {
 		this.out.writePacket(p);
 		write(bo.toByteArray(),client);
+		bo.reset();
 	}
 	
 	private void write(byte[]data,SocketChannel client) throws IOException {

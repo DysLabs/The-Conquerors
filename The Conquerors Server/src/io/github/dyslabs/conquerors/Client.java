@@ -40,10 +40,12 @@ public class Client extends PacketReceiver {
 		this(s.getInputStream(), s.getOutputStream(), s, client);
 	}
 
+	@Deprecated
 	public boolean canPoll() throws IOException {
 		return true;
 	}
 	
+	@Deprecated
 	public void poll() {
 		
 	}
@@ -52,6 +54,7 @@ public class Client extends PacketReceiver {
 		return "Client["+s.getRemoteSocketAddress()+" \""+PlayerData.username+"\"]";
 	}
 	
+	@Deprecated
 	public void poll(long s) throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException, ClassNotFoundException, NoSuchFieldException, IOException, InterruptedException {
 		Main.out.info("poll="+s);
 		Main.out.info("pbi.available "+pbi.available());
@@ -97,7 +100,7 @@ public class Client extends PacketReceiver {
 				Main.broadcast(chat);
 			}
 		} else if (p.getPacketID()==19) { // Select Window Slot
-			//TODO window
+			String spatialID=p.getField("spatialId");
 		}
 		
 		else {
@@ -133,7 +136,8 @@ public class Client extends PacketReceiver {
 				Main.broadcast(chat);
 			}
 		} else if (p.getPacketID()==19) { // Select Window Slot
-			//TODO window
+			String spatialID=p.getField("spatialID");
+			Window.lookup(spatialID).slots(this)[p.<Byte>getField("slot")].act(this);;
 		}
 		
 		else {

@@ -1,5 +1,6 @@
 package io.github.dyslabs.conquerors;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -46,7 +47,7 @@ public class Window {
 		}
 	}
 	
-	private Slot[] slots(Client c) {
+	public Slot[] slots(Client c) {
 		ArrayList<Slot> slots=new ArrayList<>();
 		for (Slot s : this.slots) {
 			if (s.qualified(c)) {
@@ -70,7 +71,7 @@ public class Window {
 		return texts;
 	}
 	
-	private class Slot {
+	public class Slot {
 		private JavaFunction qualifier,action;
 		private String text;
 		protected Slot(String text,JavaFunction qualifier,JavaFunction action) {
@@ -114,6 +115,14 @@ public class Window {
 							@Override
 							public <T> T run(Object... params) {
 								Client c=(Client)params[0];
+								try {
+									c.sendPacket(Packet.c(18, "Server",false,"Alliance does not function currently"));
+								} catch (IllegalArgumentException | IllegalAccessException | NoSuchMethodException
+										| SecurityException | InvocationTargetException | InstantiationException
+										| NoSuchFieldException | IOException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
 								c.PlayerData.alliance.group(Main.getPlayerByUsername(players[j]));
 								return null;//T
 							}}));
