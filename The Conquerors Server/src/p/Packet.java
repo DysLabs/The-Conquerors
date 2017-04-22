@@ -116,8 +116,22 @@ public class Packet {
 			for (int i = 0; i < fields.length; i++) {
 				final String f = fields[i];
 				final String t = fieldTypes[i];
-				final Object v = values[i];
-				s = s + f + "(" + t.toLowerCase().replaceFirst("array", "[]") + ")=" + v + "; ";
+				Object v = values[i];
+				String type=t;
+				if (type.contains("Array")) {
+					Object[] arr=(Object[])v;
+					StringBuilder sb=new StringBuilder();
+					sb.append(t.replaceAll("Array", "["));
+					for (int j=0;j<arr.length;j++) {
+						sb.append(arr[j]).append("; ");
+					}
+					if (sb.lastIndexOf("; ")!=-1) {
+						v=sb.toString().substring(0, sb.lastIndexOf("; "))+"]";
+					} else {
+						v=sb.toString()+"]";
+					}
+				}
+				s = s + f + "(" + type.replaceFirst("Array", "[]") + ")=" + v + "; ";
 			}
 		} catch (IllegalArgumentException | IllegalAccessException e) {
 			return s + "NULL";

@@ -2,6 +2,7 @@ package io.github.dyslabs.conquerors;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PushbackInputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
@@ -9,9 +10,11 @@ import p.Packet;
 
 public class PacketInputStream {
 	private final GeniusInputStream gis;
+	private PushbackInputStream pushBackStream;
 
 	public PacketInputStream(final InputStream in) {
 		this.gis = new GeniusInputStream(in);
+		this.pushBackStream=new PushbackInputStream(in);
 	}
 
 	/**
@@ -54,5 +57,20 @@ public class PacketInputStream {
 		}
 		Main.out.info(p.toString());
 		return p;
+	}
+	
+	public boolean empty() throws IOException {
+		  int b=pushBackStream.read();
+		  //Main.out.info(b+"");
+		  if (b==-1) {
+			  return true;
+		  }
+		  Main.out.info("Data can be read!");
+		  pushBackStream.unread(b);
+		  return false;
+	  }
+	
+	public int available() throws IOException {
+		return gis.available();
 	}
 }

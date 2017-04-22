@@ -1,5 +1,6 @@
 package io.github.dyslabs.conquerors;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -39,6 +40,9 @@ public class Group {
 				Main.out.log(Level.SEVERE, "An error occured", e);
 			} catch (final InvocationTargetException e) {
 				Main.out.log(Level.SEVERE, "An error occured", e);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 		});
 	}
@@ -73,7 +77,6 @@ public class Group {
 
 	public synchronized void ungroup(final PacketReceiver... pr) {
 		for (final PacketReceiver element : pr) {
-			// System.out.println("Ungrouped "+pr[i]);
 			this.receivers.remove(element);
 		}
 	}

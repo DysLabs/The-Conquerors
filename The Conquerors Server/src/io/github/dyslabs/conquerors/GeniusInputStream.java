@@ -11,6 +11,10 @@ public class GeniusInputStream implements DataInput {
 	public GeniusInputStream(final InputStream in) {
 		this.in = new DataInputStream(in);
 	}
+	
+	public int available() throws IOException {
+		return in.available();
+	}
 
 	public int read() throws IOException {
 		return this.in.read();

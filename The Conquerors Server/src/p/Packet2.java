@@ -9,5 +9,6 @@ package p;
 public class Packet2 extends Packet {
 	@PacketField
 	private final int id = 2;
+	@PacketField
 	private String reason;
 }
