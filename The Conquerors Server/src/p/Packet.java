@@ -195,7 +195,7 @@ public class Packet {
 				final String t = fieldTypes[i];
 				Object v = values[i];
 				final String type = t;
-				if (type.contains("Array")&&!type.contains("Byte")) {
+				if (type.contains("Array") && !type.contains("Byte")) {
 					final Object[] arr = (Object[]) v;
 					final StringBuilder sb = new StringBuilder();
 					sb.append(t.replaceAll("Array", "["));

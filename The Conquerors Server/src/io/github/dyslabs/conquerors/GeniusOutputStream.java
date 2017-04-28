@@ -52,14 +52,14 @@ public class GeniusOutputStream implements DataOutput {
 		this.out.writeByte(b);
 	}
 
-	public void writeByteArray(final Byte[] b) throws IOException {
+	public void writeByteArray(final byte[] b) throws IOException {
 		this.writeInt(b.length);
 		for (final Byte element : b) {
 			this.writeByte(element);
 		}
 	}
-	
-	public void writeByteArray(final byte[] b) throws IOException {
+
+	public void writeByteArray(final Byte[] b) throws IOException {
 		this.writeInt(b.length);
 		for (final Byte element : b) {
 			this.writeByte(element);

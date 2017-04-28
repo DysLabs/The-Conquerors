@@ -2,25 +2,20 @@ package io.github.dyslabs.conquerors;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
-import java.nio.ByteBuffer;
-import java.nio.channels.SocketChannel;
 
 import p.Packet;
 
 public class PacketReceiver {
 	private final PacketOutputStream out;
-	private final OutputStream s;
 	private final ByteArrayOutputStream bo;
+	private final String ipString;
 	private boolean valid = false;
-	private final SocketChannel client;
 
-	public PacketReceiver(final OutputStream out, final SocketChannel client) throws IOException {
-		this.s = out;
+	public PacketReceiver(final String ip) throws IOException {
 		this.bo = new ByteArrayOutputStream();
 		this.out = new PacketOutputStream(this.bo);
-		this.client = client;
+		this.ipString = ip;
 	}
 
 	public boolean isValid() {
@@ -30,7 +25,7 @@ public class PacketReceiver {
 	public void sendPacket(final Packet p) throws IllegalArgumentException, IllegalAccessException,
 			NoSuchMethodException, SecurityException, InvocationTargetException, IOException {
 		this.out.writePacket(p);
-		this.write(this.bo.toByteArray(), this.client);
+		this.write(this.bo.toByteArray());
 		this.bo.reset();
 	}
 
@@ -45,9 +40,7 @@ public class PacketReceiver {
 		Main.out.warning(this + " changed to " + valid);
 	}
 
-	private void write(final byte[] data, final SocketChannel client) throws IOException {
-		final ByteBuffer buf = ByteBuffer.wrap(data);
-		client.write(buf);
-		buf.clear();
+	private void write(final byte[] data) throws IOException {
+		Main.server.addPacket(this.ipString, data);
 	}
 }

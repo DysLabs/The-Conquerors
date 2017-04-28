@@ -1,28 +1,21 @@
 package io.github.dyslabs.conquerors;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
-import java.net.InetSocketAddress;
-import java.net.Socket;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.ByteBuffer;
-import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -38,6 +31,7 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
+import io.github.dyslabs.conquerors.net.ProtocolServer;
 import p.Packet;
 
 public class Main {
@@ -52,24 +46,7 @@ public class Main {
 	public static final String SERVER_SPATIALID = Main.getID("server");
 	public static final Logger out = Logger.getLogger(Main.class.getName());
 	public static Logger pout = Logger.getLogger(Packet.class.getName());
-
-	/**
-	 * Accept an incoming connection
-	 *
-	 * @param key
-	 * @throws IOException
-	 */
-	private static void accept(final SelectionKey key, final Selector selector) throws IOException {
-		final ServerSocketChannel server = (ServerSocketChannel) key.channel();
-		final SocketChannel channel = server.accept();
-		channel.configureBlocking(false);
-		final Socket s = channel.socket();
-
-		Main.dataMap.put(channel, new ArrayList());
-		Main.clientMap.put(channel, new Client(channel.socket(), channel));
-		channel.register(selector, SelectionKey.OP_READ);
-		Main.out.info("Accepted connection from " + s.getRemoteSocketAddress());
-	}
+	public static ProtocolServer server = new ProtocolServer();
 
 	public static void broadcast(final Packet p) throws IllegalArgumentException, IllegalAccessException,
 			NoSuchMethodException, SecurityException, InvocationTargetException, IOException {
@@ -95,29 +72,29 @@ public class Main {
 		final long id = System.nanoTime() - Main.RANDOM.nextLong();
 		return object + "[" + id + "]";
 	}
-	
-	public static File getPath(String furi) throws URISyntaxException, IOException {
-		URI uri=Main.class.getResource("assets/"+furi).toURI();
-		Path p;
-		if (uri.getScheme().equals("jar")) {
-			FileSystem fs=FileSystems.newFileSystem(uri, Collections.<String, Object>emptyMap());
-			p=fs.getPath(uri.toString());
-		} else {
-			return new File(uri.getPath());
-		}
-		return p.toFile();
-	}
 
 	public static byte[] getModel(final String uri) throws URISyntaxException, IOException {
-		File model=getPath(uri);
-		FileInputStream in=new FileInputStream(model);
-		ByteArrayOutputStream bo=new ByteArrayOutputStream();
+		final File model = Main.getPath(uri);
+		final FileInputStream in = new FileInputStream(model);
+		final ByteArrayOutputStream bo = new ByteArrayOutputStream();
 		int b;
-		while ((b=in.read())!=-1) {
+		while ((b = in.read()) != -1) {
 			bo.write(b);
 		}
 		in.close();
 		return bo.toByteArray();
+	}
+
+	public static File getPath(final String furi) throws URISyntaxException, IOException {
+		final URI uri = Main.class.getResource("assets/" + furi).toURI();
+		Path p;
+		if (uri.getScheme().equals("jar")) {
+			final FileSystem fs = FileSystems.newFileSystem(uri, Collections.<String, Object>emptyMap());
+			p = fs.getPath(uri.toString());
+		} else {
+			return new File(uri.getPath());
+		}
+		return p.toFile();
 	}
 
 	public static Client getPlayerByUsername(final String username) {
@@ -133,7 +110,7 @@ public class Main {
 
 	public static void main(final String[] args) throws SecurityException, IOException, InstantiationException,
 			IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException,
-			ClassNotFoundException, NoSuchFieldException, URISyntaxException {
+			ClassNotFoundException, NoSuchFieldException, URISyntaxException, InterruptedException {
 		/**
 		 * Setup logger
 		 */
@@ -227,34 +204,17 @@ public class Main {
 		final Selector selector = Selector.open();
 		final ServerSocketChannel server = ServerSocketChannel.open();
 		server.configureBlocking(false);
-		server.socket().bind(new InetSocketAddress("localhost", Integer.parseInt(stdin.readLine())));
-		Main.out.info("Started server on port " + server.socket().getLocalPort());
-		server.register(selector, SelectionKey.OP_ACCEPT);
+		// server.socket().bind(new InetSocketAddress("localhost",
+		// Integer.parseInt(stdin.readLine())));
+		final int port = Integer.parseInt(stdin.readLine());
+		Main.server.run(port);
+		Main.out.info("Started server on port " + port);
+		// server.register(selector, SelectionKey.OP_ACCEPT);
 
 		while (true) {
-			update();
-			selector.select();//BLOCKING
-			/* only networking should occur below here */
-			final Iterator<SelectionKey> keys = selector.selectedKeys().iterator();
-			while (keys.hasNext()) {
-				final SelectionKey key = keys.next();
-				keys.remove();
-
-				if (!key.isValid()) {
-					continue;
-				}
-				if (key.isAcceptable()) {
-					Main.accept(key, selector);
-				}
-				if (key.isReadable()) {
-					Main.read(key);
-				}
-			}
+			Main.update();
 		}
-	}
-	
-	public static void update() {//for all other code
-		
+
 	}
 
 	public static String[] playerList() {
@@ -266,49 +226,12 @@ public class Main {
 			players[i] = ((Client) iter.next()).PlayerData.username;
 			i++;
 		}
-		Main.out.info(players.length + " players");
+		// Main.out.info(players.length + " players");
 		return players;
 	}
 
 	public static int players() {
 		return Main.ALL.size();
-	}
-
-	private static void read(final SelectionKey key) throws IOException, InstantiationException, IllegalAccessException,
-			IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException,
-			ClassNotFoundException, NoSuchFieldException, URISyntaxException {
-		final SocketChannel channel = (SocketChannel) key.channel();
-		final ByteBuffer buffer = ByteBuffer.allocate(1024 * 100);
-		int numRead = -1;
-		final Socket s = channel.socket();
-		try {
-			numRead = channel.read(buffer);
-		} catch (final IOException e) {
-			Main.disconnectClient(Main.clientMap.get(channel));
-			Main.dataMap.remove(channel);
-			Main.clientMap.remove(channel);
-			Main.out.info("Client closed connection: " + s.getRemoteSocketAddress());
-			channel.close();
-			key.cancel();
-			return;
-		}
-		if (numRead == -1) {
-			Main.disconnectClient(Main.clientMap.get(channel));
-			Main.dataMap.remove(channel);
-			Main.clientMap.remove(channel);
-			Main.out.info("Client closed connection: " + s.getRemoteSocketAddress());
-			channel.close();
-			key.cancel();
-			return;
-		}
-
-		Main.out.info(numRead + " bytes read");
-		final byte[] data = new byte[numRead];
-		System.arraycopy(buffer.array(), 0, data, 0, numRead);
-		Main.out.info("Approximate data: " + new String(data));
-		final Client client = Main.clientMap.get(channel);
-		final Packet p = new PacketInputStream(new ByteArrayInputStream(data)).readPacket();
-		client.poll(p);
 	}
 
 	public static void registerClient(final Client c)
@@ -329,13 +252,16 @@ public class Main {
 			c.sendPacket(Packet.c(1, spatialID));
 			Main.broadcast(Packet.c(13, new Object[] { Main.playerList() }));
 			Main.broadcast(Packet.c(6, "player.blend"));
-			Main.broadcast(Packet.c(5, "player.blend ,,"
-					+ "", "material", spatialID));
+			Main.broadcast(Packet.c(5, "player.blend" + "", "material", spatialID));
 			/*
 			 * Packet 8 Scale Entity Packet 7 Translate Entity
 			 */
 			Main.out.info(c.PlayerData.username + " is now connected");
 			Main.broadcast(Packet.c(18, "Server", false, c.PlayerData.username + " has joined the game"));
 		}
+	}
+
+	public static void update() {
+
 	}
 }
