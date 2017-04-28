@@ -75,6 +75,10 @@ public class Main {
 
 	public static byte[] getModel(final String uri) throws URISyntaxException, IOException {
 		final File model = Main.getPath(uri);
+		if (!model.exists()) {
+			Main.out.warning(uri+" model does not exist");
+			return new byte[0];
+		}
 		final FileInputStream in = new FileInputStream(model);
 		final ByteArrayOutputStream bo = new ByteArrayOutputStream();
 		int b;
